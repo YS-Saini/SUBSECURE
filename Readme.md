@@ -1,24 +1,73 @@
-# SUBSECRUE
+# Welcome to your Lovable project
 
-## Abstract
-Safety Sync is a comprehensive safety monitoring system designed to enhance workplace safety and mitigate potential hazards in industrial environments. The system integrates advanced sensor technologies, real-time data processing, and predictive analytics to detect and respond to safety incidents proactively. Key features include the utilization of sensors for monitoring environmental conditions, worker vital signs, and equipment performance. Data collected from various sources are analyzed in real-time using machine learning algorithms to identify patterns indicative of potential risks or safety breaches. Safety Sync provides actionable insights to supervisors and safety officers, enabling them to implement preventive measures and emergency protocols swiftly. By promoting a proactive approach to safety management, Safety Sync aims to reduce workplace accidents, improve operational efficiency, and create a safer and more productive work environment for employees.
+## Project info
 
-## The Problem
-In light of recent incidents such as the tunnel collapse where workers were trapped, Safety Sync addresses the critical need for proactive safety measures in hazardous work environments. 
+**URL**: https://lovable.dev/projects/664fc7c9-7279-4f48-87b2-748ee2dd5d5d
 
-![News Headline](https://github.com/Shivansh12t/SafetySync/blob/main/images/problem.png)
+## How can I edit this code?
 
-## Intuition
-researching on the construction industry, we found the following statistics and the term **the fatal four**
+There are several ways of editing your application.
 
-![OSHA's Fatal Four](https://github.com/Shivansh12t/SafetySync/assets/68985920/906f3e2a-ef9f-457d-b08a-8d21953e6035)
+**Use Lovable**
 
-## Solution - Sync Helmet
-![Sync Helmet](https://github.com/Shivansh12t/SafetySync/blob/main/images/sidefront_helmet.png)
+Simply visit the [Lovable Project](https://lovable.dev/projects/664fc7c9-7279-4f48-87b2-748ee2dd5d5d) and start prompting.
 
-## Dashboard
-![Real time Dashboard](https://github.com/Shivansh12t/SafetySync/blob/main/images/dashboard.png)
+Changes made via Lovable will be committed automatically to this repo.
 
-## Conclusion
-We Pitched our Idea at Various Hackathons and got a great response for the design so we decided to apply for grants and secured a grant of **more than INR 6 lakhs** for the development of Minimum Viable Product, since then we formulated Sentinal Innovations Pvt Ltd which is now carrying forward the development and production of Sync Helmet.
+**Use your preferred IDE**
 
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+
+Follow these steps:
+
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
+
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
+
+# Step 3: Install the necessary dependencies.
+npm i
+
+# Step 4: Start the development server with auto-reloading and an instant preview.
+npm run dev
+```
+
+**Edit a file directly in GitHub**
+
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
+
+**Use GitHub Codespaces**
+
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
+
+## What technologies are used for this project?
+
+This project is built with:
+
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
+
+## How can I deploy this project?
+
+Simply open [Lovable](https://lovable.dev/projects/664fc7c9-7279-4f48-87b2-748ee2dd5d5d) and click on Share -> Publish.
+
+## Can I connect a custom domain to my Lovable project?
+
+Yes, you can!
+
+To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
