@@ -153,10 +153,10 @@ export const Dashboard: React.FC = () => {
               className="absolute transform -translate-x-1/2 -translate-y-1/2 group cursor-pointer"
               style={{ left: `${zone.x}%`, top: `${zone.y}%` }}
             >
-              {/* Zone circle */}
-              <div className={`w-16 h-16 rounded-full ${getStatusColor(zone.gasLevel)} flex items-center justify-center shadow-lg transition-all duration-300 group-hover:scale-110 glow-pulse border-4 border-background`}>
-                <span className="text-sm font-bold text-background">{zone.id}</span>
-              </div>
+                             {/* Zone circle */}
+               <div className={`w-16 h-16 rounded-full ${getStatusColor(zone.gasLevel)} flex items-center justify-center shadow-lg transition-all duration-300 group-hover:scale-110 border-4 border-background`}>
+                 <span className="text-sm font-bold text-background">{zone.id}</span>
+               </div>
               
               {/* Zone info popup */}
               <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
