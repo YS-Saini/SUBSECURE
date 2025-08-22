@@ -11,6 +11,8 @@ interface ZoneData {
   gasLevel: 'safe' | 'warning' | 'danger';
   x: number;
   y: number;
+  parentId?: string;
+  children?: string[];
 }
 
 interface SOSAlert {
@@ -23,12 +25,13 @@ interface SOSAlert {
 }
 
 const zoneData: ZoneData[] = [
-  { id: 'A1', name: 'Zone A1', workers: 12, temperature: 24, gasLevel: 'safe', x: 15, y: 20 },
-  { id: 'A2', name: 'Zone A2', workers: 8, temperature: 28, gasLevel: 'warning', x: 35, y: 25 },
-  { id: 'B1', name: 'Zone B1', workers: 15, temperature: 22, gasLevel: 'safe', x: 55, y: 35 },
-  { id: 'B2', name: 'Zone B2', workers: 6, temperature: 32, gasLevel: 'danger', x: 75, y: 40 },
-  { id: 'C1', name: 'Zone C1', workers: 10, temperature: 26, gasLevel: 'safe', x: 25, y: 60 },
-  { id: 'C2', name: 'Zone C2', workers: 4, temperature: 29, gasLevel: 'warning', x: 65, y: 65 },
+  { id: '1', name: 'Main Entry Point', workers: 5, temperature: 22, gasLevel: 'safe', x: 50, y: 10, children: ['2'] },
+  { id: '2', name: 'Primary Junction', workers: 8, temperature: 24, gasLevel: 'safe', x: 50, y: 30, parentId: '1', children: ['3', '4'] },
+  { id: '3', name: 'North Tunnel', workers: 6, temperature: 26, gasLevel: 'warning', x: 30, y: 50, parentId: '2', children: ['7'] },
+  { id: '4', name: 'South Tunnel', workers: 12, temperature: 28, gasLevel: 'safe', x: 70, y: 50, parentId: '2', children: ['5', '6'] },
+  { id: '5', name: 'Deep Mine A', workers: 4, temperature: 32, gasLevel: 'danger', x: 80, y: 70, parentId: '4' },
+  { id: '6', name: 'Deep Mine B', workers: 3, temperature: 30, gasLevel: 'warning', x: 60, y: 70, parentId: '4' },
+  { id: '7', name: 'Ventilation Shaft', workers: 2, temperature: 20, gasLevel: 'safe', x: 20, y: 70, parentId: '3' },
 ];
 
 const getStatusColor = (level: string) => {
@@ -144,6 +147,31 @@ export const Dashboard: React.FC = () => {
             </svg>
           </div>
           
+          {/* Connection lines - draw tree structure */}
+          <svg className="absolute inset-0 w-full h-full pointer-events-none">
+            {zoneData.map((zone) => {
+              if (zone.parentId) {
+                const parent = zoneData.find(z => z.id === zone.parentId);
+                if (parent) {
+                  return (
+                    <line
+                      key={`line-${zone.id}`}
+                      x1={`${parent.x}%`}
+                      y1={`${parent.y}%`}
+                      x2={`${zone.x}%`}
+                      y2={`${zone.y}%`}
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeDasharray="6,6"
+                      className="opacity-40"
+                    />
+                  );
+                }
+              }
+              return null;
+            })}
+          </svg>
+          
           {/* Zone markers */}
           {zoneData.map((zone) => (
             <div
@@ -152,8 +180,8 @@ export const Dashboard: React.FC = () => {
               style={{ left: `${zone.x}%`, top: `${zone.y}%` }}
             >
               {/* Zone circle */}
-              <div className={`w-16 h-16 rounded-full ${getStatusColor(zone.gasLevel)} flex items-center justify-center shadow-lg transition-all duration-300 group-hover:scale-110 glow-pulse`}>
-                <span className="text-sm font-bold">{zone.id}</span>
+              <div className={`w-16 h-16 rounded-full ${getStatusColor(zone.gasLevel)} flex items-center justify-center shadow-lg transition-all duration-300 group-hover:scale-110 glow-pulse border-4 border-background`}>
+                <span className="text-sm font-bold text-background">{zone.id}</span>
               </div>
               
               {/* Zone info popup */}
@@ -178,15 +206,15 @@ export const Dashboard: React.FC = () => {
                         {zone.gasLevel}
                       </span>
                     </div>
+                    {zone.children && zone.children.length > 0 && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Connected to:</span>
+                        <span className="text-foreground font-medium">{zone.children.join(', ')}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-              
-              {/* Connection lines */}
-              <svg className="absolute top-1/2 left-1/2 w-32 h-32 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-30">
-                <line x1="16" y1="16" x2="48" y2="16" stroke="currentColor" strokeWidth="2" strokeDasharray="4,4" />
-                <line x1="16" y1="16" x2="16" y2="48" stroke="currentColor" strokeWidth="2" strokeDasharray="4,4" />
-              </svg>
             </div>
           ))}
         </div>
