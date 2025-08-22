@@ -46,32 +46,6 @@ const getStatusColor = (level: string) => {
 export const Dashboard: React.FC = () => {
   const [sosAlerts, setSosAlerts] = useState<SOSAlert[]>([]);
 
-  // Simulate SOS alert monitoring (replace with actual API call)
-  useEffect(() => {
-    const simulateSOSAlert = () => {
-      const newAlert: SOSAlert = {
-        id: Math.random().toString(36).substr(2, 9),
-        workerId: 'W-' + Math.floor(Math.random() * 100),
-        workerName: 'John Smith',
-        location: 'Zone B2',
-        timestamp: new Date(),
-        status: 'active'
-      };
-      
-      setSosAlerts(prev => [newAlert, ...prev.slice(0, 4)]);
-      
-      toast({
-        variant: "destructive",
-        title: "🚨 SOS ALERT",
-        description: `Worker ${newAlert.workerName} in ${newAlert.location} needs immediate assistance!`,
-      });
-    };
-
-    // Simulate periodic SOS alerts for demo (remove in production)
-    const interval = setInterval(simulateSOSAlert, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
   const totalWorkers = zoneData.reduce((sum, zone) => sum + zone.workers, 0);
   const dangerZones = zoneData.filter(zone => zone.gasLevel === 'danger').length;
   const avgTemperature = Math.round(zoneData.reduce((sum, zone) => sum + zone.temperature, 0) / zoneData.length);
