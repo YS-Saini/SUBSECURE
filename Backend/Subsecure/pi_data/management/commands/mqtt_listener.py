@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand
 from decouple import config
 from django.utils import timezone
 
-from pi_data.models import NodeData
+from pi_data.models import NodeData,NodeHistory
 
 MQTT_TOPIC = config("MQTT_TOPIC", default="subsecure/data")
 
@@ -57,15 +57,27 @@ class Command(BaseCommand):
 
                     data = parse_node_string(seg)
 
-                    NodeData.objects.create(
-                        timestamp=timestamp,
-                        node_id=data["node_id"],
-                        temperature=data["temperature"],
-                        humidity=data["humidity"],
-                        pm25=data["pm25"],
-                        worker_state=data["worker_state"],
-                        worker_presence=data["worker_presence"],
+                    NodeData.objects.update_or_create(
+                        node_id=data["node_id"],  # Use node_id as the unique key
+                        defaults={
+                            'timestamp': timestamp,
+                            'temperature': data["temperature"],
+                            'humidity': data["humidity"],
+                            'pm25': data["pm25"],
+                            'worker_state': data["worker_state"],
+                            'worker_presence': data["worker_presence"],
+                        }
                     )
+
+                    # NodeHistory.objects.create(
+                    #     timestamp=timestamp,
+                    #     node_id=data["node_id"],
+                    #     temperature=data["temperature"],
+                    #     humidity=data["humidity"],
+                    #     pm25=data["pm25"],
+                    #     worker_state=data["worker_state"],
+                    #     worker_presence=data["worker_presence"],
+                    # )
 
                 self.stdout.write(self.style.SUCCESS(f"Stored data for {len(segments)} nodes"))
 

@@ -1,8 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Thermometer, AlertTriangle, Shield, Zap, HelpCircle } from 'lucide-react';
+import { Users, Thermometer, AlertTriangle, Shield, Zap, Wind, Droplets } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { toast } from '@/hooks/use-toast';
+import { getNodesData, NodeData } from '@/api/nodeData';
 
+// Extended interface with display properties
+interface NodeDisplayData extends NodeData {
+  x: number;
+  y: number;
+  name: string;
+  parentId?: string;
+  children?: string[];
+}
+
+// Static zone data structure matching original layout
 interface ZoneData {
   id: string;
   name: string;
@@ -13,29 +24,39 @@ interface ZoneData {
   y: number;
   parentId?: string;
   children?: string[];
+  nodeData?: NodeData; // API data for this zone
 }
 
-interface SOSAlert {
-  id: string;
-  workerId: string;
-  workerName: string;
-  location: string;
-  timestamp: Date;
-  status: 'active' | 'resolved';
-}
+// Map node IDs from API to zone IDs
+const nodeToZoneMap: Record<string, string> = {
+  '000': '1',
+  '001': '2',
+  '002': '3',
+  '003': '4',
+  '004': '5',
+  '005': '6',
+  '006': '7',
+};
 
-const zoneData: ZoneData[] = [
-  { id: '1', name: 'Main Entry Point', workers: 5, temperature: 22, gasLevel: 'safe', x: 50, y: 10, children: ['2'] },
-  { id: '2', name: 'Primary Junction', workers: 8, temperature: 24, gasLevel: 'safe', x: 50, y: 30, parentId: '1', children: ['3', '4'] },
-  { id: '3', name: 'North Tunnel', workers: 6, temperature: 26, gasLevel: 'warning', x: 30, y: 50, parentId: '2', children: ['7'] },
-  { id: '4', name: 'South Tunnel', workers: 12, temperature: 28, gasLevel: 'safe', x: 70, y: 50, parentId: '2', children: ['5', '6'] },
-  { id: '5', name: 'Deep Mine A', workers: 4, temperature: 32, gasLevel: 'danger', x: 80, y: 70, parentId: '4' },
-  { id: '6', name: 'Deep Mine B', workers: 3, temperature: 30, gasLevel: 'warning', x: 60, y: 70, parentId: '4' },
-  { id: '7', name: 'Ventilation Shaft', workers: 2, temperature: 20, gasLevel: 'safe', x: 20, y: 70, parentId: '3' },
+const zonePositions = [
+  { id: '1', name: 'Main Entry Point', x: 40, y: 10, children: ['2'] },
+  { id: '2', name: 'Primary Junction', x: 50, y: 35, parentId: '1', children: ['3', '4'] },
+  { id: '3', name: 'North Tunnel', x: 30, y: 50, parentId: '2', children: ['7'] },
+  { id: '4', name: 'South Tunnel', x: 70, y: 50, parentId: '2', children: ['5', '6'] },
+  { id: '5', name: 'Deep Mine A', x: 80, y: 70, parentId: '4' },
+  { id: '6', name: 'Deep Mine B', x: 60, y: 70, parentId: '4' },
+  { id: '7', name: 'Ventilation Shaft', x: 20, y: 70, parentId: '3' },
 ];
 
-const getStatusColor = (level: string) => {
-  switch (level) {
+const getStatusColor = (zone: ZoneData) => {
+  if (zone.nodeData) {
+    // Use API data to determine status
+    if (zone.nodeData.worker_state === 1 || zone.nodeData.pm25 > 100) return 'status-danger';
+    if (zone.nodeData.temperature > 35 || zone.nodeData.pm25 > 50) return 'status-warning';
+    return 'status-safe';
+  }
+  // Fallback to static data
+  switch (zone.gasLevel) {
     case 'safe': return 'status-safe';
     case 'warning': return 'status-warning';
     case 'danger': return 'status-danger';
@@ -43,13 +64,74 @@ const getStatusColor = (level: string) => {
   }
 };
 
-export const Dashboard: React.FC = () => {
-  const [sosAlerts, setSosAlerts] = useState<SOSAlert[]>([]);
+// Determine node status color based on data
+const getNodeStatusColor = (node: NodeData): string => {
+  if (node.worker_state === 1 || node.pm25 > 100) return 'status-danger';
+  if (node.temperature > 35 || node.pm25 > 50) return 'status-warning';
+  return 'status-safe';
+};
 
+export const Dashboard: React.FC = () => {
+  const [nodes, setNodes] = useState<NodeData[]>([]);
+  const [zoneData, setZoneData] = useState<ZoneData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch node data on component mount and set up auto-refresh
+  useEffect(() => {
+    fetchNodes();
+    const interval = setInterval(fetchNodes, 5000); // Refresh every 5 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchNodes = async () => {
+    try {
+      const apiData = await getNodesData();
+      setNodes(apiData);
+      
+      // Merge API data with zone positions
+      const mergedZones = zonePositions.map(zone => {
+        const nodeData = apiData.find(node => nodeToZoneMap[node.node_id] === zone.id);
+        return {
+          ...zone,
+          workers: nodeData?.worker_presence || 0,
+          temperature: nodeData?.temperature || 22,
+          gasLevel: 'safe' as const,
+          nodeData: nodeData,
+        };
+      });
+      
+      setZoneData(mergedZones);
+      setLoading(false);
+    } catch (err) {
+      // Use static positions without API data
+      const staticZones = zonePositions.map(zone => ({
+        ...zone,
+        workers: 0,
+        temperature: 22,
+        gasLevel: 'safe' as const,
+      }));
+      setZoneData(staticZones);
+      setLoading(false);
+      toast({
+        title: 'Connection Error',
+        description: 'Failed to fetch sensor data from the backend.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  // Calculate statistics from merged zone data
   const totalWorkers = zoneData.reduce((sum, zone) => sum + zone.workers, 0);
-  const dangerZones = zoneData.filter(zone => zone.gasLevel === 'danger').length;
-  const avgTemperature = Math.round(zoneData.reduce((sum, zone) => sum + zone.temperature, 0) / zoneData.length);
-  const activeSOS = sosAlerts.filter(alert => alert.status === 'active').length;
+  const dangerZones = zoneData.filter(zone => {
+    if (zone.nodeData) {
+      return zone.nodeData.worker_state === 1 || zone.nodeData.pm25 > 100;
+    }
+    return zone.gasLevel === 'danger';
+  }).length;
+  const avgTemperature = zoneData.length > 0 
+    ? Math.round(zoneData.reduce((sum, zone) => sum + zone.temperature, 0) / zoneData.length)
+    : 0;
+  const alertNodes = nodes.filter(n => n.worker_state === 1).length;
 
   return (
     <div className="space-y-6">
@@ -88,26 +170,26 @@ export const Dashboard: React.FC = () => {
         <div className="industrial-card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Active SOS</p>
-              <p className={`text-3xl font-bold ${activeSOS > 0 ? 'text-destructive animate-pulse' : 'text-success'}`}>
-                {activeSOS}
+              <p className="text-sm text-muted-foreground">Worker Alerts</p>
+              <p className={`text-3xl font-bold ${alertNodes > 0 ? 'text-destructive animate-pulse' : 'text-success'}`}>
+                {alertNodes}
               </p>
             </div>
-            <HelpCircle className={`w-8 h-8 ${activeSOS > 0 ? 'text-destructive animate-pulse' : 'text-success'}`} />
+            <AlertTriangle className={`w-8 h-8 ${alertNodes > 0 ? 'text-destructive animate-pulse' : 'text-success'}`} />
           </div>
         </div>
       </div>
 
       {/* Mine Tunnel Map */}
-      <div className="industrial-card p-8">
+      <div className="industrial-card p-6">
         <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center">
-          <Zap className="w-6 h-6 mr-3 text-primary" />
+          <Zap className="w-10 h-10 mr-3 text-primary" />
           Underground Mine Layout - Real-time Monitoring
         </h2>
         
-        <div className="relative bg-gradient-to-br from-muted to-card rounded-lg p-8 min-h-[500px] overflow-hidden">
+        <div className="relative bg-gradient-to-br from-muted to-card rounded-lg p-8 min-h-[500px] ">
           {/* Scan line animation */}
-          <div className="absolute inset-0 scan-line opacity-50"></div>
+          {/* <div className="absolute inset-0 scan-line opacity-50 overflow-hidden"></div> */}
           
           {/* Grid overlay */}
           <div className="absolute inset-0 opacity-20">
@@ -153,37 +235,93 @@ export const Dashboard: React.FC = () => {
               className="absolute transform -translate-x-1/2 -translate-y-1/2 group cursor-pointer"
               style={{ left: `${zone.x}%`, top: `${zone.y}%` }}
             >
-                             {/* Zone circle */}
-               <div className={`w-16 h-16 rounded-full ${getStatusColor(zone.gasLevel)} flex items-center justify-center shadow-lg transition-all duration-300 group-hover:scale-110 border-4 border-background`}>
-                 <span className="text-sm font-bold text-background">{zone.id}</span>
-               </div>
+              {/* Zone circle */}
+              <div className={`w-16 h-16 rounded-full ${getStatusColor(zone)} flex items-center justify-center shadow-lg transition-all duration-300 group-hover:scale-110 border-4 border-background`}>
+                <span className="text-sm font-bold text-background">{zone.id}</span>
+              </div>
+              
+              {/* Worker presence indicator */}
+              {zone.nodeData?.worker_presence === 1 && (
+                <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary rounded-full border-2 border-background flex items-center justify-center">
+                  <Users className="w-3 h-3 text-primary-foreground" />
+                </div>
+              )}
+              
+              {/* Alert indicator */}
+              {zone.nodeData?.worker_state === 1 && (
+                <div className="absolute -top-1 -left-1 w-5 h-5 bg-destructive rounded-full border-2 border-background flex items-center justify-center animate-pulse">
+                  <AlertTriangle className="w-3 h-3 text-destructive-foreground" />
+                </div>
+              )}
               
               {/* Zone info popup */}
               <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-                <div className="industrial-card p-4 min-w-48">
+                <div className="industrial-card p-4 min-w-56">
                   <h3 className="font-bold text-foreground mb-2">{zone.name}</h3>
                   <div className="space-y-1 text-sm">
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Workers:</span>
-                      <span className="text-foreground font-medium">{zone.workers}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Temperature:</span>
-                      <span className="text-foreground font-medium">{zone.temperature}°C</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Gas Level:</span>
-                      <span className={`font-medium capitalize ${
-                        zone.gasLevel === 'safe' ? 'text-success' :
-                        zone.gasLevel === 'warning' ? 'text-warning' : 'text-destructive'
-                      }`}>
-                        {zone.gasLevel}
-                      </span>
-                    </div>
+                    {zone.nodeData ? (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <Thermometer className="w-3 h-3" />
+                            Temperature:
+                          </span>
+                          <span className="text-foreground font-medium">{zone.nodeData.temperature}°C</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <Droplets className="w-3 h-3" />
+                            Humidity:
+                          </span>
+                          <span className="text-foreground font-medium">{zone.nodeData.humidity}%</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <Wind className="w-3 h-3" />
+                            PM2.5:
+                          </span>
+                          <span className={`font-medium ${
+                            zone.nodeData.pm25 > 100 ? 'text-destructive' :
+                            zone.nodeData.pm25 > 50 ? 'text-warning' : 'text-success'
+                          }`}>
+                            {zone.nodeData.pm25} μg/m³
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-muted-foreground">Worker Present:</span>
+                          <span className={`font-medium ${zone.nodeData.worker_presence === 1 ? 'text-success' : 'text-muted-foreground'}`}>
+                            {zone.nodeData.worker_presence === 1 ? 'Yes' : 'No'}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-muted-foreground">Worker State:</span>
+                          <span className={`font-medium ${zone.nodeData.worker_state === 1 ? 'text-destructive' : 'text-success'}`}>
+                            {zone.nodeData.worker_state === 1 ? 'ALERT' : 'Fine'}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between pt-1 border-t border-border">
+                          <span className="text-muted-foreground text-xs">Last Update:</span>
+                          <span className="text-foreground text-xs">
+                            {new Date(zone.nodeData.timestamp).toLocaleTimeString()}
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span className="text-muted-foreground">Workers:</span>
+                          <span className="text-foreground font-medium">{zone.workers}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-muted-foreground">Temperature:</span>
+                          <span className="text-foreground font-medium">{zone.temperature}°C</span>
+                        </div>
+                      </>
+                    )}
                     {zone.children && zone.children.length > 0 && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Connected to:</span>
-                        <span className="text-foreground font-medium">{zone.children.join(', ')}</span>
+                      <div className="flex items-center justify-between pt-1 border-t border-border">
+                        <span className="text-muted-foreground text-xs">Connected to:</span>
+                        <span className="text-foreground text-xs font-medium">{zone.children.join(', ')}</span>
                       </div>
                     )}
                   </div>
@@ -194,29 +332,29 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* SOS Emergency Alerts */}
-      {activeSOS > 0 && (
+      {/* Worker Emergency Alerts */}
+      {alertNodes > 0 && (
         <Alert variant="destructive" className="animate-pulse">
-          <HelpCircle className="h-4 w-4" />
-          <AlertTitle>🚨 EMERGENCY SOS ALERT</AlertTitle>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>🚨 WORKER ALERT</AlertTitle>
           <AlertDescription>
-            {activeSOS} worker(s) in distress requiring immediate assistance. Check locations below.
+            {alertNodes} worker(s) in alert state requiring immediate attention. Check locations below.
           </AlertDescription>
         </Alert>
       )}
 
       {/* Recent Alerts */}
       <div className="industrial-card p-6">
-        <h3 className="text-xl font-bold text-foreground mb-4">Recent Alerts</h3>
+        <h3 className="text-xl font-bold text-foreground mb-4">Recent Alerts & Warnings</h3>
         <div className="space-y-3">
-          {/* SOS Alerts */}
-          {sosAlerts.slice(0, 3).map((alert) => (
-            <div key={alert.id} className="flex items-center justify-between p-3 bg-destructive/10 border-2 border-destructive/30 rounded-lg animate-pulse">
+          {/* Worker Alert Nodes */}
+          {nodes.filter(n => n.worker_state === 1).map((node) => (
+            <div key={`alert-${node.node_id}`} className="flex items-center justify-between p-3 bg-destructive/10 border-2 border-destructive/30 rounded-lg animate-pulse">
               <div className="flex items-center space-x-3">
-                <HelpCircle className="w-5 h-5 text-destructive" />
+                <AlertTriangle className="w-5 h-5 text-destructive" />
                 <div>
-                  <p className="font-medium text-foreground">🚨 SOS - {alert.workerName} in {alert.location}</p>
-                  <p className="text-sm text-muted-foreground">{alert.timestamp.toLocaleTimeString()}</p>
+                  <p className="font-medium text-foreground">🚨 Worker Alert - Node {node.node_id}</p>
+                  <p className="text-sm text-muted-foreground">{new Date(node.timestamp).toLocaleTimeString()}</p>
                 </div>
               </div>
               <div className="bg-destructive text-destructive-foreground px-3 py-1 rounded-full text-xs font-medium">
@@ -225,31 +363,48 @@ export const Dashboard: React.FC = () => {
             </div>
           ))}
           
-          <div className="flex items-center justify-between p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-            <div className="flex items-center space-x-3">
-              <AlertTriangle className="w-5 h-5 text-destructive" />
-              <div>
-                <p className="font-medium text-foreground">High Gas Level - Zone B2</p>
-                <p className="text-sm text-muted-foreground">2 minutes ago</p>
+          {/* High PM2.5 Alerts */}
+          {nodes.filter(n => n.pm25 > 100).map((node) => (
+            <div key={`pm25-${node.node_id}`} className="flex items-center justify-between p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <Wind className="w-5 h-5 text-destructive" />
+                <div>
+                  <p className="font-medium text-foreground">High PM2.5 Level - Node {node.node_id}</p>
+                  <p className="text-sm text-muted-foreground">{node.pm25} μg/m³</p>
+                </div>
+              </div>
+              <div className="bg-destructive text-destructive-foreground px-3 py-1 rounded-full text-xs font-medium">
+                CRITICAL
               </div>
             </div>
-            <div className="bg-destructive text-destructive-foreground px-3 py-1 rounded-full text-xs font-medium">
-              CRITICAL
-            </div>
-          </div>
+          ))}
           
-          <div className="flex items-center justify-between p-3 bg-warning/10 border border-warning/20 rounded-lg">
-            <div className="flex items-center space-x-3">
-              <Thermometer className="w-5 h-5 text-warning" />
-              <div>
-                <p className="font-medium text-foreground">Temperature Rising - Zone A2</p>
-                <p className="text-sm text-muted-foreground">15 minutes ago</p>
+          {/* High Temperature Warnings */}
+          {nodes.filter(n => n.temperature > 35 && n.worker_state !== 1).map((node) => (
+            <div key={`temp-${node.node_id}`} className="flex items-center justify-between p-3 bg-warning/10 border border-warning/20 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <Thermometer className="w-5 h-5 text-warning" />
+                <div>
+                  <p className="font-medium text-foreground">High Temperature - Node {node.node_id}</p>
+                  <p className="text-sm text-muted-foreground">{node.temperature}°C</p>
+                </div>
+              </div>
+              <div className="bg-warning text-warning-foreground px-3 py-1 rounded-full text-xs font-medium">
+                WARNING
               </div>
             </div>
-            <div className="bg-warning text-warning-foreground px-3 py-1 rounded-full text-xs font-medium">
-              WARNING
+          ))}
+
+          {/* No alerts message */}
+          {nodes.filter(n => n.worker_state === 1).length === 0 && 
+           nodes.filter(n => n.pm25 > 100).length === 0 && 
+           nodes.filter(n => n.temperature > 35).length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              <Shield className="w-12 h-12 mx-auto mb-3 text-success" />
+              <p className="text-lg font-medium">All Systems Normal</p>
+              <p className="text-sm">No active alerts or warnings</p>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
