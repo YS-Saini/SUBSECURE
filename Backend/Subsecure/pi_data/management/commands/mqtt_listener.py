@@ -69,15 +69,15 @@ class Command(BaseCommand):
                         }
                     )
 
-                    # NodeHistory.objects.create(
-                    #     timestamp=timestamp,
-                    #     node_id=data["node_id"],
-                    #     temperature=data["temperature"],
-                    #     humidity=data["humidity"],
-                    #     pm25=data["pm25"],
-                    #     worker_state=data["worker_state"],
-                    #     worker_presence=data["worker_presence"],
-                    # )
+                    NodeHistory.objects.create(
+                        timestamp=timestamp,
+                        node_id=data["node_id"],
+                        temperature=data["temperature"],
+                        humidity=data["humidity"],
+                        pm25=data["pm25"],
+                        worker_state=data["worker_state"],
+                        worker_presence=data["worker_presence"],
+                    )
 
                 self.stdout.write(self.style.SUCCESS(f"Stored data for {len(segments)} nodes"))
 
