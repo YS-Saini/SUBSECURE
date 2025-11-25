@@ -29,23 +29,23 @@ interface ZoneData {
 
 // Map node IDs from API to zone IDs
 const nodeToZoneMap: Record<string, string> = {
-  '000': '1',
-  '001': '2',
-  '002': '3',
-  '003': '4',
-  '004': '5',
-  '005': '6',
-  '006': '7',
+  '000': '0',
+  '001': '1',
+  '002': '2',
+  '003': '3',
+  '004': '4',
+  '005': '5',
+  '006': '6',
 };
 
 const zonePositions = [
-  { id: '1', name: 'Main Entry Point', x: 40, y: 10, children: ['2'] },
-  { id: '2', name: 'Primary Junction', x: 50, y: 35, parentId: '1', children: ['3', '4'] },
-  { id: '3', name: 'North Tunnel', x: 30, y: 50, parentId: '2', children: ['7'] },
-  { id: '4', name: 'South Tunnel', x: 70, y: 50, parentId: '2', children: ['5', '6'] },
-  { id: '5', name: 'Deep Mine A', x: 80, y: 70, parentId: '4' },
-  { id: '6', name: 'Deep Mine B', x: 60, y: 70, parentId: '4' },
-  { id: '7', name: 'Ventilation Shaft', x: 20, y: 70, parentId: '3' },
+  { id: '0', name: 'Main Entry Point', x: 50, y: 10, children: ['1'] },
+  { id: '1', name: 'Primary Junction', x: 50, y: 35, parentId: '0', children: ['3', '2'] },
+  { id: '3', name: 'North Tunnel', x: 30, y: 50, parentId: '1', children: ['6'] },
+  { id: '2', name: 'South Tunnel', x: 70, y: 50, parentId: '1', children: ['4', '5'] },
+  { id: '4', name: 'Deep Mine A', x: 80, y: 70, parentId: '2' },
+  { id: '5', name: 'Deep Mine B', x: 60, y: 70, parentId: '2' },
+  { id: '6', name: 'Ventilation Shaft', x: 20, y: 70, parentId: '3' },
 ];
 
 const getStatusColor = (zone: ZoneData) => {
