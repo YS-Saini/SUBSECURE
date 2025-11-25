@@ -39,7 +39,7 @@ const nodeToZoneMap: Record<string, string> = {
 };
 
 const zonePositions = [
-  { id: '1', name: 'Main Entry Point', x: 40, y: 10, children: ['2'] },
+  { id: '1', name: 'Main Entry Point', x: 50, y: 10, children: ['2'] },
   { id: '2', name: 'Primary Junction', x: 50, y: 35, parentId: '1', children: ['3', '4'] },
   { id: '3', name: 'North Tunnel', x: 30, y: 50, parentId: '2', children: ['7'] },
   { id: '4', name: 'South Tunnel', x: 70, y: 50, parentId: '2', children: ['5', '6'] },
