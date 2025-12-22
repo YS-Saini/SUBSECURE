@@ -1,73 +1,75 @@
-# Welcome to your Lovable project
+<img width="337" height="207" alt="image" src="https://github.com/user-attachments/assets/3524957c-a6d8-4f5a-93bb-7fc9e98c3963" /># SubSecure
 
-## Project info
+**SubSecure: A Comprehensive Safety and Monitoring Solution for Underground Mines**
 
-**URL**: https://lovable.dev/projects/664fc7c9-7279-4f48-87b2-748ee2dd5d5d
+Mining, especially underground operations, remains one of the most hazardous industries, where worker safety and environmental monitoring are critical concerns. The harsh working conditions, coupled with the complexities of managing and tracking workers in such environments, call for advanced technological solutions.  
+SubSecure, an innovative and efficient system, addresses these challenges by offering an integrated platform for real-time monitoring, tracking, and safety management in underground coal mines.
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## Overview
 
-**Use Lovable**
+SubSecure enhances worker safety and operational efficiency in underground mines by utilizing smart ID cards, static sensor nodes, and a robust management dashboard or mobile application.  
+Key goals include:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/664fc7c9-7279-4f48-87b2-748ee2dd5d5d) and start prompting.
+- Continuous tracking of miners  
+- Automatic logging of shift transitions  
+- Real-time monitoring of environmental parameters  
+- Compliance with Directorate General of Mines Safety (DGMS) guidelines  
 
-Changes made via Lovable will be committed automatically to this repo.
+---
 
-**Use your preferred IDE**
+## Components
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 1. Smart ID Cards for Mining Workers
+- **Battery Life**: 3–4 years  
+- **Continuous Broadcasting**: Worker IDs transmitted via BLE in real time  
+- **Automated Shift Logging**: Entry/exit detection without manual clocking  
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### 2. Static Nodes for Environmental Monitoring
+- **Robust Design**: IP69 casing, compact (5×5 cm)  
+- **Environmental Sensors**:  
+  - Particulate Matter (PM2.5, PM10)  
+  - Temperature & Humidity  
+  - Lethal Gas Leaks (e.g., methane)  
+- **Data Transmission**: Worker IDs + environmental data sent to ground station  
 
-Follow these steps:
+### 3. Dashboard / Mobile Application
+- **Real-Time Worker Tracking**  
+- **Environmental Monitoring with Alerts**  
+- **Automated Shift Logging**  
+- **DGMS Compliance**  
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+---
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## Key Advantages
 
-# Step 3: Install the necessary dependencies.
-npm i
+1. **Worker Tracking in Remote Locations** (BLE + static nodes, no mobile/satellite needed)  
+2. **Real-Time Safety Monitoring** with immediate alerts  
+3. **Streamlined Shift Transitions** without manual errors  
+4. **Scalable & Adaptable** (nodes at 5–10m intervals)  
+5. **Low Maintenance** (long battery life, durable nodes)  
+6. **Data-Driven Insights** (analytics & reporting)  
+7. **Regulatory Compliance** (DGMS)  
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+---
 
-**Edit a file directly in GitHub**
+## Use Cases
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- **Emergency Situations**: Locate trapped workers quickly during collapses or gas leaks  
+- **Regular Operations**: Smooth shift management, safe environment monitoring  
+- **Regulatory Audits**: Automatic logs for safety compliance and accountability  
 
-**Use GitHub Codespaces**
+---
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Conclusion
 
-## What technologies are used for this project?
+SubSecure is more than a tracking system — it’s a **comprehensive safety and efficiency solution** for underground mining.  
+By combining BLE-powered smart ID cards, robust static nodes, and an intuitive management platform, it ensures:  
 
-This project is built with:
+- **Safety first**: Real-time alerts and monitoring  
+- **Operational efficiency**: Automated processes reduce human error  
+- **Scalability**: Adaptable to different mine sizes and layouts  
+- **Compliance**: Aligns with DGMS regulations  
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/664fc7c9-7279-4f48-87b2-748ee2dd5d5d) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+> SubSecure empowers mine managers to make informed, data-driven decisions that prioritize worker safety while enhancing productivity.
