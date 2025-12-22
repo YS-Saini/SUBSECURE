@@ -1,6 +1,5 @@
-<img width="337" height="207" alt="image" src="https://github.com/user-attachments/assets/3524957c-a6d8-4f5a-93bb-7fc9e98c3963" /># SubSecure
 
-**SubSecure: A Comprehensive Safety and Monitoring Solution for Underground Mines**
+# **SubSecure: A Comprehensive Safety and Monitoring Solution for Underground Mines**
 
 Mining, especially underground operations, remains one of the most hazardous industries, where worker safety and environmental monitoring are critical concerns. The harsh working conditions, coupled with the complexities of managing and tracking workers in such environments, call for advanced technological solutions.  
 SubSecure, an innovative and efficient system, addresses these challenges by offering an integrated platform for real-time monitoring, tracking, and safety management in underground coal mines.
